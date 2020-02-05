@@ -101,11 +101,12 @@ passport.use(
 );
 
 const GithubStrategy = require("passport-github").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 
 passport.use(
   new GithubStrategy(
     {
-      clientId: process.env.GITHUB_CLIENT_ID,
+      clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
       callbackURL: "http://localhost:3000/github/callback"
     },
@@ -116,6 +117,31 @@ passport.use(
             done(null, userDocument);
           } else {
             return User.create({ githubId: profile.id }).then(createdUser => {
+              done(null, createdUser);
+            });
+          }
+        })
+        .catch(err => {
+          done(err);
+        });
+    }
+  )
+);
+
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:3000/facebook/callback"
+    },
+    function(accessToken, refreshToken, profile, done) {
+      User.findOne({ facebookId: profile.id })
+        .then(userDocument => {
+          if (userDocument) {
+            done(null, userDocument);
+          } else {
+            return User.create({ facebookId: profile.id }).then(createdUser => {
               done(null, createdUser);
             });
           }
