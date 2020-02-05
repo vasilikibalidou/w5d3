@@ -8,7 +8,7 @@ router.get("/signup", (req, res, next) => {
 });
 
 router.get("/login", (req, res) => {
-  res.render("login.hbs");
+  res.render("login.hbs", { errorMessage: req.flash("error") });
 });
 
 router.get("/logout", (req, res, next) => {
@@ -18,44 +18,16 @@ router.get("/logout", (req, res, next) => {
   });
 });
 
-router.post("/login", (req, res, next) => {
-  // const username = req.body.username;
-  // const password = req.body.password;
-  const { username, password } = req.body;
+const passport = require("passport");
 
-  let user;
-
-  // User.findOne({ username: req.body.username })
-  User.findOne({ username: username })
-    .then(foundUser => {
-      // if (foundUser === null)
-      if (!foundUser) {
-        res.render("signup.hbs", {
-          errorMessage: "Invalid credentials"
-        });
-        return;
-      }
-
-      user = foundUser;
-
-      return bcrypt.compare(password, foundUser.password);
-    })
-    .then(match => {
-      if (!match) {
-        res.render("signup.hbs", { errorMessage: "Invalid credentials" });
-        return;
-      }
-      // log user in
-
-      // {"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"},"foo":{"_id":"5e3a78fa86c5cdcaebc8e80e","username":"user42","password":"$2b$10$CBqx55h.vIi6GtLUf2qGJeVXRGjbzEDT3LOwD0PwYzsI3V7EksInS","__v":0}}
-
-      req.session.user = user;
-      res.redirect("/");
-    })
-    .catch(err => {
-      next(err);
-    });
-});
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/login",
+    failureFlash: true
+  })
+);
 
 router.post("/signup", (req, res, next) => {
   // const username = req.body.username;
@@ -93,7 +65,7 @@ router.post("/signup", (req, res, next) => {
         .then(createdUser => {
           console.log(createdUser);
 
-          req.session.user = createdUser;
+          // implement passport login
           res.redirect("/");
         });
     })

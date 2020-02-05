@@ -25,7 +25,7 @@ router.get("/books/:id", (req, res, next) => {
     .then(bookDocument => {
       res.render("bookDetails.hbs", {
         book: bookDocument,
-        user: req.session.user
+        user: req.user
       });
     })
     .catch(err => {
@@ -36,7 +36,7 @@ router.get("/books/:id", (req, res, next) => {
 router.get("/books/:bookId/edit", (req, res, next) => {
   const promises = [Author.find({}), Book.findById(req.params.bookId)];
 
-  if (!req.session.user) {
+  if (!req.user) {
     res.redirect("/");
     return;
   }
@@ -66,7 +66,7 @@ router.get("/books/:bookId/edit", (req, res, next) => {
 });
 
 router.get("/books/:bookId/delete", (req, res, next) => {
-  if (!req.session.user) {
+  if (!req.user) {
     res.redirect("/");
     return;
   }

@@ -50,6 +50,56 @@ app.use(
   })
 );
 
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const flash = require("connect-flash");
+app.use(flash());
+
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+const User = require("./models/User");
+
+passport.deserializeUser((id, done) => {
+  User.findById(id)
+    .then(userDocument => {
+      done(null, userDocument);
+    })
+    .catch(err => {
+      done(err);
+    });
+});
+
+const bcrypt = require("bcrypt");
+
+passport.use(
+  new LocalStrategy((username, password, done) => {
+    User.findOne({ username: username })
+      .then(userDocument => {
+        console.log(userDocument);
+        if (!userDocument) {
+          done(null, false, { message: "Incorrect credentials" });
+          return;
+        }
+        bcrypt.compare(password, userDocument.password).then(match => {
+          if (!match) {
+            done(null, false, { message: "Incorrect credentials" });
+            return;
+          }
+          done(null, userDocument);
+        });
+      })
+      .catch(err => {
+        done(err);
+      });
+  })
+);
+
 // Express View engine setup
 
 app.use(
