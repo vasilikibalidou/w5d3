@@ -1,0 +1,10 @@
+<h1>{{book.title}}</h1>
+<p>written by {{book.author.name}} {{book.author.lastName}}</p>
+<img src="{{book.author.pictureUrl}}" height="100px">
+<p>Summary: {{book.description}}</p>
+<p>Rating: {{book.rating}}</p>
+<a href="/books">View all books</a>
+{{#if user}}
+<a href="/books/{{book._id}}/edit">Edit this book</a>
+<a href="/books/{{book._id}}/delete">Delete this book</a>
+{{/if}}
