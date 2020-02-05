@@ -4,7 +4,8 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String
   },
-  password: String
+  password: String,
+  githubId: String
 });
 
 const User = mongoose.model("User", userSchema);

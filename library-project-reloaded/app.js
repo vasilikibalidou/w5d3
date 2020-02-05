@@ -100,6 +100,33 @@ passport.use(
   })
 );
 
+const GithubStrategy = require("passport-github").Strategy;
+
+passport.use(
+  new GithubStrategy(
+    {
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/github/callback"
+    },
+    (accessToken, refreshToken, profile, done) => {
+      User.findOne({ githubId: profile.id })
+        .then(userDocument => {
+          if (userDocument) {
+            done(null, userDocument);
+          } else {
+            return User.create({ githubId: profile.id }).then(createdUser => {
+              done(null, createdUser);
+            });
+          }
+        })
+        .catch(err => {
+          done(err);
+        });
+    }
+  )
+);
+
 // Express View engine setup
 
 app.use(

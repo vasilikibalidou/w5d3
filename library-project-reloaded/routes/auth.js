@@ -12,10 +12,8 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/logout", (req, res, next) => {
-  req.session.destroy(err => {
-    if (err) next(err);
-    res.redirect("/");
-  });
+  req.logout();
+  res.redirect("/");
 });
 
 const passport = require("passport");
@@ -63,15 +61,28 @@ router.post("/signup", (req, res, next) => {
           return User.create({ username: username, password: hash });
         })
         .then(createdUser => {
-          console.log(createdUser);
-
-          // implement passport login
-          res.redirect("/");
+          req.login(createdUser, err => {
+            if (err) {
+              next(err);
+              return;
+            }
+            res.redirect("/");
+          });
         });
     })
     .catch(err => {
       next(err);
     });
 });
+
+router.get("/github", passport.authenticate("github"));
+
+router.get(
+  "/github/callback",
+  passport.authenticate("github", {
+    failureRedirect: "/",
+    successRedirect: "/"
+  })
+);
 
 module.exports = router;
